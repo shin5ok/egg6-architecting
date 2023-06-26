@@ -29,6 +29,8 @@ type dbClient struct {
 	sc *spanner.Client
 }
 
+var baseItemSliceCap = 100
+
 func newClient(ctx context.Context, dbString string) (dbClient, error) {
 
 	client, err := spanner.NewClient(ctx, dbString)
@@ -111,7 +113,7 @@ func (d dbClient) userItems(ctx context.Context, w io.Writer, userID string) ([]
 	iter := txn.Query(ctx, stmt)
 	defer iter.Stop()
 
-	results := []map[string]interface{}{}
+	results := make([]map[string]interface{}, 0, baseItemSliceCap)
 	for {
 		row, err := iter.Next()
 		if err == iterator.Done {
