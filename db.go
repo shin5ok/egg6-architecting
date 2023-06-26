@@ -21,8 +21,7 @@ type userParams struct {
 }
 
 type itemParams struct {
-	itemID    string
-	itemPrice int
+	itemID string
 }
 
 type dbClient struct {
