@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"time"
@@ -20,6 +21,12 @@ var appName = "myapp"
 
 var spannerString = os.Getenv("SPANNER_STRING")
 var servicePort = os.Getenv("PORT")
+
+var tankaList = []string{
+	"東海の 小島の磯の 白砂に われ泣きぬれて 蟹とたわむる",
+	"みずうみの 氷は解けて なほ寒し 三日月の影 波にうつろふ",
+	"何となく 君に待たるる ここちして 出でし花野の 夕月夜かな",
+}
 
 type Serving struct {
 	Client GameUserOperation
@@ -63,6 +70,7 @@ func main() {
 
 	r.Get("/ping", s.pingPong)
 	r.Get("/haiku", s.haikuHandler)
+	r.Get("/tanka", s.tankaHandler)
 
 	r.Route("/api", func(t chi.Router) {
 		t.Get("/user_id/{user_id:[a-z0-9-.]+}", s.getUserItems)
@@ -127,4 +135,16 @@ func (s Serving) pingPong(w http.ResponseWriter, r *http.Request) {
 func (s Serving) haikuHandler(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, http.StatusOK)
 	render.PlainText(w, r, "Old silent pond...\nA frog jumps into the pond,\nsplash! Silence again.")
+}
+
+func (s Serving) tankaHandler(w http.ResponseWriter, r *http.Request) {
+	rand.Seed(time.Now().UnixNano())
+	var selectedTanka string
+	if len(tankaList) == 0 {
+		selectedTanka = "ふるさとの訛なつかし停車場の人ごみの中にそを聴きにゆく"
+	} else {
+		selectedTanka = tankaList[rand.Intn(len(tankaList))]
+	}
+	render.Status(r, http.StatusOK)
+	render.JSON(w, r, map[string]string{"tanka": selectedTanka})
 }
