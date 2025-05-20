@@ -80,6 +80,27 @@ func Test_run(t *testing.T) {
 		t.Errorf("Expected: %d. Got: %d, Message: %s", http.StatusOK, rr.Code, rr.Body)
 	}
 
+	// Check the response body
+	expected := "Pong\n"
+	assert.Equal(t, expected, rr.Body.String(), "handler returned unexpected body")
+
+}
+
+func TestHaikuHandler(t *testing.T) {
+	req, err := http.NewRequest("GET", "/haiku", nil)
+	assert.Nil(t, err)
+
+	rr := httptest.NewRecorder()
+	// Use fakeServing which is already initialized
+	handler := http.HandlerFunc(fakeServing.haikuHandler)
+	handler.ServeHTTP(rr, req)
+
+	// Check the status code
+	assert.Equal(t, http.StatusOK, rr.Code, fmt.Sprintf("handler returned wrong status code: got %v want %v", rr.Code, http.StatusOK))
+
+	// Check the response body
+	expectedHaiku := "Old silent pond...\nA frog jumps into the pond,\nsplash! Silence again."
+	assert.Equal(t, expectedHaiku, rr.Body.String(), "handler returned unexpected body")
 }
 
 func Test_createUser(t *testing.T) {
